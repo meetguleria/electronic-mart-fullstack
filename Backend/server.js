@@ -4,7 +4,12 @@ const { Client } = require('pg');
 require('dotenv').config();
 
 const RolesMiddleware = require('./middleware/RolesMiddleware');
-const CRUDControllers = require('./controllers/CRUDControllers');
+const {
+  getAllItems,
+  createItem,
+  updateItem,
+  deleteItem
+} = require('./controllers/electronicsItemController');
 const registrationController = require('./controllers/registrationController');
 const validateRegistration = require('./middleware/validateRegisteration');
 const signInController = require('./controllers/signInController');

@@ -1,5 +1,8 @@
 require('dotenv').config();
+
 module.exports = {
-  connString: process.env.CONN_STRING,
-  dialect: 'postgres',
+  development: {
+    url: process.env.CONN_STRING,
+    dialect: 'postgres'
+  }
 }

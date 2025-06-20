@@ -7,7 +7,8 @@ module.exports = {
     "**/tests/**/*.test.js"
   ],
 
-  // Setup file to run before tests
+  // Setup files to run before tests
+  setupFiles: ['<rootDir>/tests/setup/env.setup.js'],
   setupFilesAfterEnv: ['<rootDir>/tests/setup/jest.setup.js'],
 
   // Coverage configuration

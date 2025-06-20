@@ -3,15 +3,17 @@
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
-const { connString } = require('../config/config');
+const config = require('../config/config');
 
 const basename = path.basename(__filename);
+const env = process.env.NODE_ENV || 'development';
+const dbConfig = config[env];
 const db = {};
 
 // Initialize Sequelize
-const sequelize = new Sequelize(connString, {
-  dialect: 'postgres',
-  logging: false,
+const sequelize = new Sequelize(dbConfig.url, {
+  dialect: dbConfig.dialect,
+  logging: dbConfig.logging
 });
 
 fs

@@ -1,4 +1,3 @@
-// controllers/signInController.js
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
@@ -9,6 +8,10 @@ const JWTString = process.env.JWT_STRING;
 async function signInUser(req, res) {
   try {
     const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ message: 'Username and password are required' });
+    }
 
     // Find the user by username
     const user = await User.findOne({ where: { username } });

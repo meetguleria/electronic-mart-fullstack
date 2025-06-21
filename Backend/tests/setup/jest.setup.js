@@ -19,4 +19,4 @@ beforeEach(async () => {
 // Cleanup after all tests
 afterAll(async () => {
   await closeTestDb();
-}); 
+});

@@ -6,7 +6,7 @@ const { sequelize } = require('./models');
 const RolesMiddleware = require('./middleware/RolesMiddleware');
 const { getAllItems, createItem, updateItem, deleteItem } = require('./controllers/electronicsItemController');
 const { registerUser } = require('./controllers/registrationController');
-const validateRegistration = require('./middleware/validateRegisteration');
+const validateRegistration = require('./middleware/validateRegistration');
 const { signInUser } = require('./controllers/signInController');
 const JWTAuth = require('./middleware/JWTAuth');
 
@@ -32,7 +32,7 @@ app.get('/', (req, res) => res.json({ message: 'Welcome to NodeJS API.' }));
 app.post('/register', validateRegistration, registerUser);
 app.post('/signin', signInUser);
 
-app.get('/all_items', JWTAuth, getAllItems);
+app.get('/all_items', getAllItems);
 app.post('/create_item', JWTAuth, RolesMiddleware.verifyAdmin, createItem);
 app.put('/update/item/:id', JWTAuth, RolesMiddleware.verifyAdminOrMod, updateItem);
 app.delete('/delete/item/:id', JWTAuth, RolesMiddleware.verifyAdmin, deleteItem);

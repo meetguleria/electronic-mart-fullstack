@@ -4,7 +4,9 @@
   "description": "Node.js API connected to Postgres DB",
   "main": "server.js",
   "scripts": {
-    "test": "jest"
+    "db:migrate:test": "sequelize-cli db:migrate --env test",
+    "db:seed:test": "sequelize-cli db:seed:all --env test",
+    "test": "cross-env NODE_ENV=test jest --runInBand"
   },
   "author": "Meet Guleria",
   "license": "ISC",
@@ -19,6 +21,7 @@
     "sequelize": "^6.37.7"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "jest": "^29.7.0",
     "sequelize-cli": "^6.6.3",
     "supertest": "^7.1.1"

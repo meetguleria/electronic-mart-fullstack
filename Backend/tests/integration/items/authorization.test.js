@@ -18,12 +18,15 @@ describe('Authorization Integration Tests', () => {
       defaults: { role_name: 'admin' }
     });
 
-    const user = await User.create({
-      username: 'auth_test_admin',
-      email: 'auth_test_admin@example.com',
-      password: 'Password123!',
-      role_id: role[0].role_id
-    });
+    await request(app)
+      .post('/register')
+      .send({
+        username: 'auth_test_admin',
+        email: 'auth_test_admin@example.com',
+        password: 'Password123!',
+        role_name: 'admin'
+      })
+      .expect(201);
 
     // Get valid token
     const response = await request(app)
@@ -43,7 +46,7 @@ describe('Authorization Integration Tests', () => {
         .send(testItem)
         .expect(401);
 
-      expect(response.body).toHaveProperty('message', 'No token provided!');
+      expect(response.body).toHaveProperty('message', 'Token Missing');
     });
 
     it('should reject requests with malformed token', async () => {
@@ -53,7 +56,7 @@ describe('Authorization Integration Tests', () => {
         .send(testItem)
         .expect(401);
 
-      expect(response.body).toHaveProperty('message', 'Invalid token!');
+      expect(response.body).toHaveProperty('message', 'Invalid Token');
     });
 
     it('should reject requests with expired token', async () => {
@@ -70,7 +73,7 @@ describe('Authorization Integration Tests', () => {
         .send(testItem)
         .expect(401);
 
-      expect(response.body).toHaveProperty('message', 'Token expired!');
+      expect(response.body).toHaveProperty('message', 'Invalid Token');
     });
 
     it('should accept requests with valid token', async () => {

@@ -2,7 +2,7 @@ const { sequelize } = require('../../models');
 
 async function setupTestDb() {
   try {
-    // Force sync will drop all tables and recreate them
+    // Drops all tables & recreates them
     await sequelize.sync({ force: true });
     console.log('Test database setup complete');
   } catch (error) {
@@ -11,16 +11,8 @@ async function setupTestDb() {
   }
 }
 
-async function clearTestDb() {
-  try {
-    // Clean all tables but keep the structure
-    await sequelize.truncate({ cascade: true });
-    console.log('Test database cleared');
-  } catch (error) {
-    console.error('Test database cleanup failed:', error);
-    throw error;
-  }
-}
+// alias clear to the same
+const clearTestDb = setupTestDb;
 
 async function closeTestDb() {
   try {
@@ -36,4 +28,4 @@ module.exports = {
   setupTestDb,
   clearTestDb,
   closeTestDb
-}; 
+};

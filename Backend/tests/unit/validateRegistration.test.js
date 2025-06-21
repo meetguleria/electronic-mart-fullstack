@@ -1,5 +1,5 @@
 const { User, Role } = require('../../models');
-const validateRegistration = require('../../middleware/validateRegisteration');
+const validateRegistration = require('../../middleware/validateRegistration');
 
 // Mock the models
 jest.mock('../../models', () => ({
@@ -36,7 +36,7 @@ describe('validateRegistration middleware', () => {
       body: {
         username: 'testuser',
         email: 'test@example.com',
-        password: 'password123'
+        password: 'Str0ngP@ss!'
       }
     };
     res = {

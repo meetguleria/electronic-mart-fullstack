@@ -55,7 +55,7 @@ describe('validateRegistration middleware', () => {
 
       expect(User.findOne).toHaveBeenCalledWith({
         where: {
-          [Symbol('or')]: [
+          [Op.or]: [
             { username: 'testuser' },
             { email: 'test@example.com' }
           ]

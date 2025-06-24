@@ -11,9 +11,9 @@ const dbConfig = config[env];
 const db = {};
 
 // Initialize Sequelize
-const sequelize = new Sequelize(dbConfig.connString, {
+const sequelize = new Sequelize(dbConfig.url, {
   dialect: dbConfig.dialect,
-  logging: dbConfig.logging
+  logging: typeof dbConfig.logging !== 'undefined' ? dbConfig.logging : false
 });
 
 fs

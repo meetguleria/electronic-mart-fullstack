@@ -6,7 +6,7 @@ module.exports = {
     dialect: 'postgres'
   },
   test: {
-    url: process.env.TEST_CONN_STRING || process.env.CONN_STRING + '_test',
+    url: process.env.TEST_CONN_STRING,
     dialect: 'postgres',
     logging: false // Disable logging in test environment
   }

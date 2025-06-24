@@ -1,10 +1,3 @@
-const {
-  getAllItems,
-  createItem,
-  updateItem,
-  deleteItem
-} = require('../../controllers/electronicsItemController');
-
 jest.mock('../../models', () => ({
   ElectronicsItem: {
     findAll: jest.fn(),
@@ -13,6 +6,13 @@ jest.mock('../../models', () => ({
     destroy: jest.fn()
   }
 }));
+
+const {
+  getAllItems,
+  createItem,
+  updateItem,
+  deleteItem
+} = require('../../controllers/electronicsItemController');
 
 const { ElectronicsItem } = require('../../models');
 
@@ -105,6 +105,7 @@ describe('electronicsItemController', () => {
     });
 
     it('should respond with 500 on error', async () => {
+      req.params.id = '3';
       ElectronicsItem.update.mockRejectedValue(new Error('DB error'));
 
       await updateItem(req, res);

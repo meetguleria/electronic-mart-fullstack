@@ -188,9 +188,9 @@ describe('signInController', () => {
       // Test with missing username
       req.body = { password: 'password123' };
       await signInUser(req, res);
-      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Internal Server Error'
+        message: 'Username and password are required'
       });
 
       // Reset mocks
@@ -199,9 +199,9 @@ describe('signInController', () => {
       // Test with missing password
       req.body = { username: 'testuser' };
       await signInUser(req, res);
-      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Internal Server Error'
+        message: 'Username and password are required'
       });
     });
   });

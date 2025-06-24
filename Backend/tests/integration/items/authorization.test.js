@@ -12,30 +12,13 @@ describe('Authorization Integration Tests', () => {
   };
 
   beforeAll(async () => {
-    // Create admin role and user
-    const role = await Role.findOrCreate({
-      where: { role_name: 'admin' },
-      defaults: { role_name: 'admin' }
-    });
-
-    await request(app)
-      .post('/register')
-      .send({
-        username: 'auth_test_admin',
-        email: 'auth_test_admin@example.com',
-        password: 'Password123!',
-        role_name: 'admin'
-      })
-      .expect(201);
-
-    // Get valid token
+    // Get valid token for global admin user
     const response = await request(app)
       .post('/signin')
       .send({
-        username: 'auth_test_admin',
-        password: 'Password123!'
+        username: 'global_admin',
+        password: 'StrongP@ssw0rd!'
       });
-
     validToken = response.body.token;
   });
 
@@ -63,7 +46,7 @@ describe('Authorization Integration Tests', () => {
       // Create an expired token
       const expiredToken = jwt.sign(
         { id: 1, username: 'test', role: 'admin' },
-        process.env.JWT_SECRET,
+        process.env.JWT_STRING,
         { expiresIn: '0s' }
       );
 

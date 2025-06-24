@@ -89,9 +89,9 @@ describe('Registration API Integration Tests', () => {
           ...validUser,
           email: 'invalid-email'
         })
-        .expect(500);
+        .expect(400);
 
-      expect(response.body).toHaveProperty('message', 'Internal Server Error');
+      expect(response.body).toHaveProperty('message', 'Invalid email format');
     });
 
     it('should require all necessary fields', async () => {
@@ -104,9 +104,9 @@ describe('Registration API Integration Tests', () => {
         const response = await request(app)
           .post('/register')
           .send(invalidUser)
-          .expect(500);
+          .expect(400);
 
-        expect(response.body.message).toContain('Internal Server Error');
+        expect(response.body.message).toContain('required');
       }
     });
 
@@ -154,9 +154,9 @@ describe('Registration API Integration Tests', () => {
             ...validUser,
             password
           })
-          .expect(500);
+          .expect(400);
 
-        expect(response.body.message).toContain('Internal Server Error');
+        expect(response.body.message).toContain('Password');
       }
     });
   });

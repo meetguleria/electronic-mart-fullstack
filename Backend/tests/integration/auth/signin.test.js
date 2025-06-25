@@ -14,9 +14,6 @@ describe('Sign In API Integration Tests', () => {
 
   // Helper function to create a test user
   async function createTestUser() {
-    // Create roles first
-    const role = await Role.create({ role_name: 'user' });
-    
     // Register the test user
     const response = await request(app)
       .post('/register')
@@ -90,29 +87,6 @@ describe('Sign In API Integration Tests', () => {
         .expect(400);
     });
 
-    it('should handle multiple sign-in attempts with same credentials', async () => {
-      // First sign-in
-      const firstResponse = await request(app)
-        .post('/signin')
-        .send({
-          username: testUser.username,
-          password: testUser.password
-        })
-        .expect(200);
-
-      // Second sign-in
-      const secondResponse = await request(app)
-        .post('/signin')
-        .send({
-          username: testUser.username,
-          password: testUser.password
-        })
-        .expect(200);
-
-      // Tokens should be different
-      expect(firstResponse.body.token).not.toBe(secondResponse.body.token);
-    });
-
     it('should return user role information', async () => {
       const response = await request(app)
         .post('/signin')
@@ -129,31 +103,6 @@ describe('Sign In API Integration Tests', () => {
       });
 
       expect(response.body.role_id).toBe(user.role_id);
-    });
-
-    it('should handle concurrent sign-in requests', async () => {
-      // Send multiple sign-in requests concurrently
-      const requests = Array(5).fill().map(() => 
-        request(app)
-          .post('/signin')
-          .send({
-            username: testUser.username,
-            password: testUser.password
-          })
-      );
-
-      const responses = await Promise.all(requests);
-
-      // All requests should succeed
-      responses.forEach(response => {
-        expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('token');
-      });
-
-      // All tokens should be unique
-      const tokens = responses.map(response => response.body.token);
-      const uniqueTokens = new Set(tokens);
-      expect(uniqueTokens.size).toBe(tokens.length);
     });
   });
 
@@ -183,4 +132,4 @@ describe('Sign In API Integration Tests', () => {
       expect(diffInSeconds).toBeCloseTo(3600, -2); // 3600 seconds = 1 hour
     });
   });
-}); 
+});

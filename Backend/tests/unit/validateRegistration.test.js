@@ -1,20 +1,18 @@
-const { User, Role } = require('../../models');
-const validateRegistration = require('../../middleware/validateRegistration');
+// Mock Sequelize models before they are imported anywhere else
+jest.mock('../../models', () => {
+  // create one shared Symbol so test & middleware use the exact same reference
+  const Op = { or: Symbol('or') };
 
-// Mock the models
-jest.mock('../../models', () => ({
-  User: {
-    findOne: jest.fn()
-  },
-  Role: {
-    findOne: jest.fn()
-  },
-  Sequelize: {
-    Op: {
-      or: Symbol('or')
-    }
-  }
-}));
+  return {
+    User: { findOne: jest.fn() },
+    Role: { findOne: jest.fn() },
+    Sequelize: { Op }
+  };
+});
+
+const { User, Role, Sequelize } = require('../../models');
+const { Op } = Sequelize;               // Op is now the **object** containing the `or` symbol
+const validateRegistration = require('../../middleware/validateRegistration');
 
 describe('validateRegistration middleware', () => {
   let req;
@@ -53,6 +51,7 @@ describe('validateRegistration middleware', () => {
 
       await validateRegistration(req, res, next);
 
+      expect(User.findOne).toHaveBeenCalledTimes(1);
       expect(User.findOne).toHaveBeenCalledWith({
         where: {
           [Op.or]: [
@@ -145,4 +144,4 @@ describe('validateRegistration middleware', () => {
       expect(next).not.toHaveBeenCalled();
     });
   });
-}); 
+});

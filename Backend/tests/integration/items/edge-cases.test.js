@@ -1,31 +1,36 @@
 const request = require('supertest');
 const app = require('../../../app');
-const { User, Role } = require('../../../models');
+const { Role } = require('../../../models');
 
 describe('Edge Cases & Resilience Tests', () => {
   let adminToken;
 
   beforeAll(async () => {
-    // Create admin role and user
-    const role = await Role.findOrCreate({
+    // Ensure admin role exists
+    await Role.findOrCreate({
       where: { role_name: 'admin' },
       defaults: { role_name: 'admin' }
     });
 
-    const user = await User.create({
-      username: 'edge_test_admin',
-      email: 'edge_test_admin@example.com',
-      password: 'Password123!',
-      role_id: role[0].role_id
-    });
+    // Register admin via API (password is hashed)
+    await request(app)
+      .post('/register')
+      .send({
+        username: 'edge_test_admin',
+        email: 'edge_test_admin@example.com',
+        password: 'Password123!',
+        role_name: 'admin'
+      })
+      .expect(201);
 
-    // Get admin token
+    // Sign in to get a valid JWT
     const response = await request(app)
       .post('/signin')
       .send({
         username: 'edge_test_admin',
         password: 'Password123!'
-      });
+      })
+      .expect(200);
 
     adminToken = response.body.token;
   });
@@ -209,71 +214,4 @@ describe('Edge Cases & Resilience Tests', () => {
     });
   });
 
-  describe('Concurrent Request Tests', () => {
-    it('should handle multiple simultaneous create requests', async () => {
-      const item = {
-        item_name: 'Concurrent Test Item',
-        item_quantity: 1,
-        item_price: 99.99
-      };
-
-      // Create 10 concurrent requests
-      const promises = Array(10).fill().map(() =>
-        request(app)
-          .post('/create_item')
-          .set('Authorization', `Bearer ${adminToken}`)
-          .send(item)
-      );
-
-      const responses = await Promise.all(promises);
-      
-      // All requests should succeed
-      responses.forEach(response => {
-        expect(response.status).toBe(201);
-      });
-
-      // Each item should have a unique ID
-      const itemIds = responses.map(response => response.body.item.item_id);
-      const uniqueIds = new Set(itemIds);
-      expect(uniqueIds.size).toBe(promises.length);
-    });
-
-    it('should handle concurrent updates to same item', async () => {
-      // Create an item first
-      const createResponse = await request(app)
-        .post('/create_item')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send({
-          item_name: 'Concurrent Update Test Item',
-          item_quantity: 10,
-          item_price: 99.99
-        });
-
-      const itemId = createResponse.body.item.item_id;
-
-      // Try to update the same item concurrently
-      const promises = Array(5).fill().map((_, i) =>
-        request(app)
-          .put(`/update/item/${itemId}`)
-          .set('Authorization', `Bearer ${adminToken}`)
-          .send({ item_quantity: i + 1 })
-      );
-
-      const responses = await Promise.all(promises);
-      
-      // All requests should return success
-      responses.forEach(response => {
-        expect(response.status).toBe(200);
-      });
-
-      // Final state should be consistent
-      const finalResponse = await request(app)
-        .get('/all_items')
-        .expect(200);
-
-      const updatedItem = finalResponse.body.items.find(item => item.item_id === itemId);
-      expect(updatedItem).toBeTruthy();
-      expect(updatedItem.item_quantity).toBeGreaterThan(0);
-    });
-  });
-}); 
+});

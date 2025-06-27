@@ -12,27 +12,25 @@ describe('Electronics Items CRUD Integration Tests', () => {
 
   // Helper function to create a user and get token
   async function createUserAndGetToken(username, role_name) {
-    // Create role if doesn't exist
-    const role = await Role.findOrCreate({
-      where: { role_name },
-      defaults: { role_name }
-    });
+    // Register the test user via the API (password hashed)
+    await request(app)
+      .post('/register')
+      .send({
+        username,
+        email: `${username}@example.com`,
+        password: 'Password123!',
+        role_name
+      })
+      .expect(201);
 
-    // Create user
-    const user = await User.create({
-      username,
-      email: `${username}@example.com`,
-      password: 'Password123!',
-      role_id: role[0].role_id
-    });
-
-    // Get token
+    // Sign in to get a valid JWT
     const response = await request(app)
       .post('/signin')
       .send({
         username,
         password: 'Password123!'
-      });
+      })
+      .expect(200);
 
     return response.body.token;
   }

@@ -71,39 +71,44 @@ describe('Authorization Integration Tests', () => {
   describe('Role-Based Authorization Tests', () => {
     let userToken, modToken;
 
-    beforeAll(async () => {
-      // Create roles if they don't exist
-      await Role.findOrCreate({
-        where: { role_name: 'user' },
-        defaults: { role_name: 'user' }
-      });
-      await Role.findOrCreate({
-        where: { role_name: 'moderator' },
-        defaults: { role_name: 'moderator' }
-      });
+    beforeEach(async () => {
+      // Reset test users before each test
+      await User.destroy({ where: {}, cascade: true });
+      // Ensure roles are present
+      await Role.findOrCreate({ where: { role_name: 'user' }, defaults: { role_name: 'user' } });
+      await Role.findOrCreate({ where: { role_name: 'moderator' }, defaults: { role_name: 'moderator' } });
 
-      // Create test users and get their tokens
-      async function createUserAndGetToken(username, role_name) {
-        const role = await Role.findOne({ where: { role_name } });
-        const user = await User.create({
-          username,
-          email: `${username}@example.com`,
+      // Register and sign in test user
+      await request(app)
+        .post('/register')
+        .send({
+          username: 'auth_test_user',
+          email: 'auth_test_user@example.com',
           password: 'Password123!',
-          role_id: role.role_id
-        });
+          role_name: 'user'
+        })
+        .expect(201);
+      const userRes = await request(app)
+        .post('/signin')
+        .send({ username: 'auth_test_user', password: 'Password123!' })
+        .expect(200);
+      userToken = userRes.body.token;
 
-        const response = await request(app)
-          .post('/signin')
-          .send({
-            username,
-            password: 'Password123!'
-          });
-
-        return response.body.token;
-      }
-
-      userToken = await createUserAndGetToken('auth_test_user', 'user');
-      modToken = await createUserAndGetToken('auth_test_mod', 'moderator');
+      // Register and sign in test moderator
+      await request(app)
+        .post('/register')
+        .send({
+          username: 'auth_test_mod',
+          email: 'auth_test_mod@example.com',
+          password: 'Password123!',
+          role_name: 'moderator'
+        })
+        .expect(201);
+      const modRes = await request(app)
+        .post('/signin')
+        .send({ username: 'auth_test_mod', password: 'Password123!' })
+        .expect(200);
+      modToken = modRes.body.token;
     });
 
     describe('Admin-only endpoints', () => {
@@ -136,7 +141,7 @@ describe('Authorization Integration Tests', () => {
       let itemId;
 
       beforeEach(async () => {
-        // Create a test item
+        // Create a test item as admin
         const response = await request(app)
           .post('/create_item')
           .set('Authorization', `Bearer ${validToken}`)
@@ -194,4 +199,4 @@ describe('Authorization Integration Tests', () => {
       });
     });
   });
-}); 
+});

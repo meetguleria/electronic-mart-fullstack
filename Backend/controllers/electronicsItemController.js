@@ -11,9 +11,42 @@ async function getAllItems(req, res) {
 }
 
 async function createItem(req, res) {
+  // Validate payload structure
+  if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
+    return res.status(400).json({ message: 'Invalid payload' });
+  }
+
+  const { item_name, item_quantity } = req.body;
+
+  // Check required fields
+  if (item_name === undefined || item_quantity === undefined) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  // Validate types
+  if (typeof item_name !== 'string') {
+    return res.status(400).json({ message: 'Invalid item_name' });
+  }
+  if (!Number.isSafeInteger(item_quantity)) {
+    return res.status(400).json({ message: 'Invalid item_quantity' });
+  }
+
+  // Validate constraints
+  if (item_name.length > 255) {
+    return res.status(400).json({ message: 'Invalid item_name' });
+  }
+  if (item_quantity < 0) {
+    return res.status(400).json({ message: 'Invalid item_quantity' });
+  }
+
+  // Sanitize item_name: remove script tags
+  const sanitizedItemName = item_name.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
+
   try {
-    const { item_name, item_quantity } = req.body;
-    const item = await ElectronicsItem.create({ item_name, item_quantity });
+    const item = await ElectronicsItem.create({
+      item_name: sanitizedItemName,
+      item_quantity
+    });
     return res.status(201).json({ message: 'Item created!', item });
   } catch (err) {
     console.error('Error creating item:', err);
@@ -39,9 +72,12 @@ async function updateItem(req, res) {
 }
 
 async function deleteItem(req, res) {
+  const idNum = parseInt(req.params.id, 10);
+  if (isNaN(idNum)) {
+    return res.status(404).json({ message: 'Item not found' });
+  }
   try {
-    const { id } = req.params;
-    const deleted = await ElectronicsItem.destroy({ where: { item_id: id } });
+    const deleted = await ElectronicsItem.destroy({ where: { item_id: idNum } });
     if (!deleted) {
       return res.status(404).json({ message: 'Item not found' });
     }

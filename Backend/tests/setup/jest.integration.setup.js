@@ -33,10 +33,8 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  // Clean out every table before individual test
-  await sequelize.truncate({ cascade: true });
-  // Reseed roles and global admin
-  await seedDatabase();
+  // Clean out only ElectronicsItems between tests
+  await sequelize.getQueryInterface().bulkDelete('ElectronicsItems', null, {});
 });
 
 afterAll(async () => {

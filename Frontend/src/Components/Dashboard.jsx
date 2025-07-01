@@ -1,31 +1,30 @@
 import { useState, useEffect } from 'react';
 
 import CreateItem from './Actions/CreateItem';
+import ConfirmModal from './ConfirmModal';
+import api from '../Services/api';
 
-import axios from 'axios';
 import jwt_decode from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 import { AiFillEdit } from 'react-icons/ai'
 import { MdDeleteForever } from 'react-icons/md';
 
 const Dashboard = () => {
-
-    const API_BASE_URL = import.meta.env.VITE_BASE_URL;
-
     const navigate = useNavigate();
 
     const [electronicItems, setElectronicItems] = useState([]);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [roleId, setRoleId] = useState(null);
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
 
     useEffect(() => {
-
         const storedToken = localStorage.getItem('token');
         if (storedToken) {
             const decoded = jwt_decode(storedToken)
             const role_Id = decoded.role_id;
             setRoleId(role_Id)
-            fetchItems();     
+            fetchItems();
         } else {
             navigate('/signin')
         }
@@ -34,11 +33,7 @@ const Dashboard = () => {
 
     const fetchItems = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/all_items`, {
-                headers: {
-                    authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-            });
+            const response = await api.get('/all_items');
             setElectronicItems(response.data.items);
         } catch (error) {
             console.error(error);
@@ -73,20 +68,25 @@ const Dashboard = () => {
     }
 
     const handleDelete = (item) => {
-        const itemId = item.item_id;
-
-        axios.delete(`${API_BASE_URL}/delete/item/${itemId}`, {
-            header: {
-                authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-        })
+        setItemToDelete(item);
+        setConfirmOpen(true);
+    };
+    const confirmDelete = () => {
+        api.delete(`/delete/item/${itemToDelete.item_id}`)
             .then((response) => {
                 console.log('Item deleted:', response.data.message);
                 fetchItems();
             })
-            .catch((error) => {
-                console.error('Error deleting item:', error);
+            .catch(error => console.error('Error deleting item:', error))
+            .finally(() => {
+                setConfirmOpen(false);
+                setItemToDelete(null);
             });
+        };
+
+    const cancelDelete = () => {
+        setConfirmOpen(false);
+        setItemToDelete(null);
     };
 
     return (
@@ -98,6 +98,19 @@ const Dashboard = () => {
                 <button onClick={handleCreateItemClick} >Create New Item</button>
                 <button onClick={handleLogout} >Log Out</button>
             </div>
+            {showCreateForm && (
+                <CreateItem
+                fetchItems={fetchItems}
+                onClose={() => setShowCreateForm(false)}
+                />
+            )}
+            {confirmOpen && (
+                <ConfirmModal
+                    message={`Delete "${itemToDelete.item_name}"?`}
+                    onConfirm={confirmDelete}
+                    onCancel={cancelDelete}
+                />
+            )}
             <table className='dashboard-table'>
                 <thead>
                     <tr>

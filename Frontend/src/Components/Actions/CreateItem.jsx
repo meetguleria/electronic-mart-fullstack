@@ -1,10 +1,7 @@
 import { useState } from 'react';
+import api from '../../Services/api';
 
-import axios from 'axios';
-
-const CreateItem = () => {
-    const API_BASE_URL = import.meta.env.VITE_BASE_URL;
-
+const CreateItem = ({ fetchItems, onClose }) => {
     const [itemName, setItemName] = useState('');
     const [itemQuantity, setItemQuantity] = useState('');
 
@@ -14,17 +11,14 @@ const CreateItem = () => {
         // Creating object with the item data
         const newItem = {
             item_name: itemName,
-            item_quantity: itemQuantity,
+            item_quantity: Number(itemQuantity),
         };
 
         // Make a POST request to create the item
-        axios.post(`${API_BASE_URL}/create_item`, newItem, {
-            headers: {
-                'Content-Type': 'application/json',
-                authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-        })
+        api.post('/create_item', newItem)
             .then((response) => {
+                fetchItems();
+                onClose();
                 console.log('Item created:', response.data);
             })
             .catch((error) => {
@@ -57,6 +51,16 @@ const CreateItem = () => {
                     />
                 </div>
                 <button type="submit">Create</button>
+                <button 
+                    type="button"
+                    onClick={() => {
+                        onClose();
+                        setItemName('');
+                        setItemQuantity('');
+                    }}
+                >
+                    Cancel
+                </button>
             </form>
         </div>
     )

@@ -88,7 +88,7 @@ function SignUp() {
             <ul>
               <li>Choose a unique username.</li>
               <li>Provide a valid email address.</li>
-              <li>Set a strong password.</li>
+              <li>Set a strong password.Atleast 8 characters, 1 uppercase, 1 lowercase, 1 special character</li>
               <li>Select your role from the dropdown.</li>
             </ul>
           </div>

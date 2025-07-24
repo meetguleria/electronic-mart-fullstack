@@ -1,0 +1,33 @@
+# Node modules and install artifacts
+node_modules                  # not needed inside container; will be re-installed  [oai_citation:0‡medium.com](https://medium.com/greedygame-engineering/so-you-want-to-dockerize-your-react-app-64fbbb74c217?utm_source=chatgpt.com)
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Vite build output
+dist                          # Vite outputs to dist; rebuild in image  [oai_citation:1‡medium.com](https://medium.com/%40pvasu3658/guide-to-dockerizing-and-deploying-your-vite-react-app-8ed6eaca002e?utm_source=chatgpt.com)
+
+# Docker files (don’t copy these into the image)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Git metadata
+.git
+.gitignore
+
+# Environment variables (to avoid leaking secrets)
+.env
+.env.*.local
+
+# IDE/editor folders
+.vscode
+.idea
+
+# OS/system files
+.DS_Store
+
+# Optional: test coverage and logs
+coverage
+*.log
